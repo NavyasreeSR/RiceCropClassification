@@ -1,0 +1,102 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+
+\geometry{a4paper}
+
+\title{Your Paper Title}
+\author{
+    Navya Sree Santhapet \\ Indiana University \\ \texttt{nsantha@iu.edu} \and
+    Author Two Name \\ Affiliation \\ \texttt{email2@address.com} \and
+    Author Three Name \\ Affiliation \\ \texttt{email3@address.com}
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{center}
+    GitHub Repository: \url{https://github.com/yourgithubrepo}
+\end{center}
+
+\begin{abstract}
+This report documents the development and evaluation of a rice crop identification model for 250 geo locations in the An Giang province of Vietnam. The goal was to create a classification model capable of distinguishing between rice and non-rice fields using satellite data. Our approach focused on enhancing model precision by leveraging feature values with higher correlation and extracting predictor variable values for the entire year. We compared our model with an existing solution based on Logistic Regression, refining the model parameters and feature extraction techniques. Our enhanced model achieved an F1 score of 0.85, showcasing significant improvement over the benchmark F1 score. However, despite our efforts, we did not qualify for the second round of the competition. This report provides insights into the methodology, results, and implications of our research, highlighting both the strengths and limitations of our approach. Future work may focus on exploring more advanced machine learning algorithms and integrating additional data sources to further improve crop identification accuracy.
+\end{abstract}
+
+\section{Introduction}
+The demand for efficient agricultural practices has grown significantly in recent years, driven by the need to address global food security challenges. In this context, the accurate identification of crop types, such as rice, plays a crucial role in optimizing agricultural strategies and resource allocation. This report focuses on the development and evaluation of a rice crop identification model for 250 geo locations in the An Giang province of Vietnam using satellite data. The significance of this study lies in its potential to contribute to the prioritization of actions aimed at tackling hunger by identifying areas where rice, a staple food crop for many populations, is growing. By leveraging geospatial datasets and machine learning techniques, our research aims to create a classification model capable of distinguishing between rice and non-rice fields with high precision. The approach taken in this study involves enhancing model accuracy by leveraging feature values with higher correlation and extracting predictor variable values for the entire year, rather than relying on single-date data. By comparing our model with existing solutions and refining parameters such as C, penalty, solver, and class weight, we seek to demonstrate improvements in crop identification performance. This introduction sets the stage for the subsequent sections of the report, which will delve into the methodology, results, and implications of our research in detail.
+\section{Related Work}
+The field of crop identification and classification using remote sensing data has been the subject of extensive research. Several studies have explored methodologies and approaches that align closely with our proposed solution, offering valuable insights and comparisons. 
+\cite{Lobell2013} 2.1 Lobell, D.B. delve into methodologies for crop identification using satellite imagery, highlighting the importance of feature extraction and machine learning algorithms in achieving accurate classification results. Their work provides a foundation for our approach, particularly in terms of leveraging feature values with higher correlation to enhance model precision.\cite{HaoP2016}2.2 Hao, P., Wang, L. contributes crucial insights into potential pitfalls and challenges encountered in similar studies. By addressing issues such as data variability, model overfitting, and feature selection, Jones' work serves as a reference point for refining our methodology and ensuring robustness in our approach.\cite{Michel2013} 2.3 Löw, F., Michel, U. Additionally, studies by researchers have explored the use of different machine learning algorithms, including support vector machines (SVMs) and random forests, for crop classification tasks. These studies provide valuable comparisons and benchmarks for evaluating the performance of our model against alternative approaches.
+
+By reviewing and synthesizing existing literature, we aim to build upon previous research findings and contribute novel insights to the field of crop identification using geospatial datasets and machine learning techniques.
+
+
+\section{Methodology}
+The methodology employed in this study revolves around developing a rice crop classification model using satellite data from the Sentinel-1 dataset. Key steps performed were outlined below.
+\subsection{Data collection}
+Given a Dataset with geo-location data (Latitude and Longitude) with tags specifying the presence of rice or non-rice crops from a specific region in Vietnam for the year 2020. Extracted variables such as VV and VH for an entire year, calculated their mean from the Sentinel-1 RTC dataset and computed RVI AND NDVI values using extracted variables and used them as predictor variables as they have higher correlation values. While extracting the predictor variables used 3x3, 5x5 or 7x7 window around the specific latitude and longitude point to get improved results.
+\subsection{Data preprocessing}
+We implemented feature scaling using the Standard Scaler to normalize the VV and VH variables, which is a crucial step for many machine learning algorithms. The data was split into 70% training data and 30% test data using scikit-learn’ s train_test_split function for model evaluation.
+\subsection{Model Selection and Training}
+We opted for a binary logistic regression model from the scikit-learn library due to predictor variable value is categorial which is yes (Rice) or no (Non Rice) type. The model was trained using the training data, with predictor variables (RVI and NDVI) and response variable (presence of rice crop) separated into appropriate arrays (X and Y).
+\subsection{Model Evaluation}
+In-sample evaluation involved generating a classification report and confusion matrix using the training data to assess the model's performance. Out-sample evaluation was conducted by predicting on the test data to estimate the model's ability to generalize and avoid overfitting.
+
+
+\section{Results}
+In-Sample Evaluation:
+We generated a classification report and a confusion matrix for the training data. This is an in-sample performance testing , which is the performance testing on the training dataset.
+
+\includegraphics[width=0.8\textwidth]{inssample.png}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{confusion matrix.png}
+    \caption{Confusion Matrix}
+    \label{fig:Confusion Matrix}
+\end{figure}
+
+Out-Sample Evaluation:
+To estimate the out-of-sample performance, we predicted on the test data.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{outsample.png}
+    \caption{F1 Score}
+    \label{fig:f1-score}
+\end{figure}
+confusion matrix:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.99\textwidth]{confution_matrix_outsample.png}
+    \caption{Confusion Matrix (Out-Sample)}
+    \label{fig:confusion-matrix-outsample}
+\end{figure}
+
+
+
+
+\section{Conclusion}
+In conclusion, our research in developing a rice crop classification model using satellite data have yielded valuable insights and outcomes.Through the utilization of the Sentinel-1 dataset and machine learning techniques, we have achieved significant progress in predicting the presence of rice crops in the An Giang province of Vietnam.
+\subsection{Findings and Implications:}
+Our model, based on logistic regression and utilizing features vv and VH from Sentinel-1 data, achieved an F1 score of 0.85, showcasing its effectiveness in distinguishing between rice and non-rice fields.
+The significance of accurately identifying rice crop locations extends beyond agricultural applications. It aids in prioritizing actions to address food security challenges, particularly in regions heavily reliant on rice as a staple food.
+The simplicity and interpretability of our model make it accessible for further refinement and implementation in real-world scenarios.
+\subsection{Future Work:}
+Future work could focus on enhancing the model's accuracy by exploring additional features or alternative machine learning algorithms.
+Collaborative efforts with domain experts and stakeholders can enrich the model with contextual insights, enhancing its practical utility.
+Expanding the geographical scope of the study to include diverse regions can provide a broader perspective on rice crop identification challenges and solutions.
+
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

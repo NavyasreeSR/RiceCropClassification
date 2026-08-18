@@ -1,0 +1,99 @@
+def get_sentinel_data(latlong,time_slice,assets):
+    '''
+    Returns VV and VH values for a given latitude and longitude 
+    Attributes:
+    latlong - A tuple with 2 elements - latitude and longitude
+    time_slice - Timeframe for which the VV and VH values have to be extracted
+    assets - A list of bands to be extracted
+    '''
+
+    latlong=latlong.replace('(','').replace(')','').replace(' ','').split(',')
+    bbox_of_interest = (float(latlong[1]) , float(latlong[0]), float(latlong[1]) , float(latlong[0]))
+    time_of_interest = time_slice
+    box_size_deg1 = 0.0003 # Surrounding box in degrees, yields approximately 5x5 pixel region
+    box_size_deg2 = 0.0004
+    box_size_deg3 = 0.0007
+    
+    box_size_deg = 0.10 # Surrounding box in degrees
+    # Calculate the Lat-Lon bounding box region
+    min_lon = float(latlong[1])-box_size_deg/2
+    min_lat = float(latlong[0])-box_size_deg/2
+    max_lon = float(latlong[1])+box_size_deg/2
+    max_lat = float(latlong[0])+box_size_deg/2
+    bounds = (min_lon, min_lat, max_lon, max_lat)
+
+    # Define the time window
+    time_window= time_slice
+    bands_of_interest = assests
+
+
+    min_lon1 = float(latlong[1])-box_size_deg1/2
+    min_lat1 = float(latlong[0])-box_size_deg1/2
+    max_lon1 = float(latlong[1])+box_size_deg1/2
+    max_lat1 = float(latlong[0])+box_size_deg1/2
+
+    min_lon2 = float(latlong[1])-box_size_deg2/2
+    min_lat2 = float(latlong[0])-box_size_deg2/2
+    max_lon2 = float(latlong[1])+box_size_deg2/2
+    max_lat2 = float(latlong[0])+box_size_deg2/2
+
+    min_lon3 = float(latlong[1])-box_size_deg3/2
+    min_lat3 = float(latlong[0])-box_size_deg3/2
+    max_lon3 = float(latlong[1])+box_size_deg3/2
+    max_lat3 = float(latlong[0])+box_size_deg3/2
+
+    bbox1 = (min_lon1, min_lat1, max_lon1, max_lat1)
+    bbox2 = (min_lon2, min_lat2, max_lon2, max_lat2)
+    bbox3 = (min_lon3, min_lat3, max_lon3, max_lat3)
+    
+    catalog = pystac_client.Client.open("https://planetarycomputer.microsoft.com/api/stac/v1")
+    search1 = catalog.search(collections=["sentinel-1-rtc"], bbox=bbox1, datetime=time_of_interest)
+    items1 = list(search1.get_all_items()) # This produces a list of scene IDs
+    search2 = catalog.search(collections=["sentinel-1-rtc"], bbox=bbox2, datetime=time_of_interest)
+    items2 = list(search2.get_all_items()) # This produces a list of scene IDs
+    search3 = catalog.search(collections=["sentinel-1-rtc"], bbox=bbox3, datetime=time_of_interest)
+    items3 = list(search3.get_all_items()) # This produces a list of scene IDs
+
+# Define the pixel resolution for the final product
+# Define the scale according to our selected crs, so we will use degrees
+
+    resolution = 10  # meters per pixel 
+    scale = resolution / 111320.0 # degrees per pixel for crs=4326 
+
+# Load the data using Open Data Cube
+    data1 = stac_load(items1,bands=["vv", "vh"], patch_url=pc.sign, bbox=bbox1, crs="EPSG:4326", resolution=scale)
+    data2 = stac_load(items2,bands=["vv", "vh"], patch_url=pc.sign, bbox=bbox2, crs="EPSG:4326", resolution=scale)
+    data3 = stac_load(items3,bands=["vv", "vh"], patch_url=pc.sign, bbox=bbox3, crs="EPSG:4326", resolution=scale)
+
+# View the details of our xarray dataset
+# The
+#X and Y dimensions tell us the pixel dimensions of our bounding box
+# The "time" variable is the number of scenes that touch our region
+    data1
+    data2
+    data3
+
+    mean1 = data1.mean(dim=['latitude','longitude']).compute()
+    mean2 = data2.mean(dim=['latitude','longitude']).compute()
+    mean3 = data3.mean(dim=['latitude','longitude']).compute()
+
+# Calculate RVI
+    dop1 = (mean1.vv / (mean1.vv + mean1.vh))
+    m1 = 1 - dop1
+    rvi1 = (np.sqrt(dop1))*((4*mean1.vh)/(mean1.vv + mean1.vh))
+    mean_rvi1 = rvi1.mean()
+# Calculate RVI
+    dop2 = (mean2.vv / (mean2.vv + mean2.vh))
+    m2 = 1 - dop2
+    rvi2 = (np.sqrt(dop2))*((4*mean2.vh)/(mean2.vv + mean2.vh))
+    mean_rvi2 = rvi2.mean()
+# Calculate RVI
+    dop3 = (mean3.vv / (mean3.vv + mean3.vh))
+    m3 = 1 - dop3
+    rvi3 = (np.sqrt(dop3))*((4*mean3.vh)/(mean3.vv + mean3.vh))
+    mean_rvi3 = rvi3.mean()
+
+
+    mean_rvi = (mean_rvi1 + mean_rvi2 + mean_rvi3) / 3
+
+    return mean_rvi
